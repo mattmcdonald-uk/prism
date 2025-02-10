@@ -11,8 +11,7 @@ use EchoLabs\Prism\Contracts\PrismRequest;
 use EchoLabs\Prism\Contracts\Schema;
 use EchoLabs\Prism\Enums\Provider;
 use EchoLabs\Prism\Enums\StructuredMode;
-use EchoLabs\Prism\ValueObjects\Messages\SystemMessage;
-use EchoLabs\Prism\ValueObjects\Messages\UserMessage;
+use EchoLabs\Prism\Enums\ToolChoice;
 
 readonly class Request implements PrismRequest
 {
@@ -20,6 +19,7 @@ readonly class Request implements PrismRequest
 
     /**
      * @param  array<int, Message>  $messages
+     * @param  array<int, Tool>  $tools
      * @param  array<string, mixed>  $clientOptions
      * @param  array{0: array<int, int>|int, 1?: Closure|int, 2?: ?callable, 3?: bool}  $clientRetry
      * @param  array<string, mixed>  $providerMeta
@@ -29,17 +29,20 @@ readonly class Request implements PrismRequest
         public string $model,
         public ?string $prompt,
         public array $messages,
+        public int $maxSteps,
         public ?int $maxTokens,
         public int|float|null $temperature,
         public int|float|null $topP,
+        public array $tools,
         public array $clientOptions,
         public array $clientRetry,
+        public string|ToolChoice|null $toolChoice,
         public Schema $schema,
         public array $providerMeta,
         public StructuredMode $mode,
     ) {}
 
-    public function addMessage(UserMessage|SystemMessage $message): self
+    public function addMessage(Message $message): self
     {
         $messages = array_merge($this->messages, [$message]);
 
@@ -48,11 +51,14 @@ readonly class Request implements PrismRequest
             model: $this->model,
             prompt: $this->prompt,
             messages: $messages,
+            maxSteps: $this->maxSteps,
             maxTokens: $this->maxTokens,
             temperature: $this->temperature,
             topP: $this->topP,
+            tools: $this->tools,
             clientOptions: $this->clientOptions,
             clientRetry: $this->clientRetry,
+            toolChoice: $this->toolChoice,
             schema: $this->schema,
             providerMeta: $this->providerMeta,
             mode: $this->mode,
